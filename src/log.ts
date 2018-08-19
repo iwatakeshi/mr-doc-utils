@@ -1,90 +1,153 @@
-'use strict';
+import * as chalk from 'chalk';
 
-const Util = require('util');
-const chalk = require('chalk');
-const sparkles = require('sparkles');
-import * as _ from 'lodash';
-import { EventEmitter } from 'events';
+/*
+  @credits https://blog.hellojs.org/simple-javascript-logger-in-typescript-demonstrating-interfaces-union-types-and-rest-parameters-6efc5aee2c97
+  @author Takeshi Iwana
+ */
 
 /**
- * Format the messagse
- * @param  {*} message - The message to format.
- * @return {*}         - The formatted message.
+ * An interface that defines a logger.
  */
-function format() {
-  return _.isString(arguments[0]) ? Util.format.apply(null, arguments) : arguments[0];
+export interface LogInterface {
+  out(message: string, ...data: any[]): void
+  log(message: string, ...data: any[]): void
+  info(message: string, ...data: any[]): void
+  debug(message: string, ...data: any[]): void
+  warn(message: string, ...data: any[]): void
+  error(message: string, ...data: any[]): void
 }
-/**
- * Create an emitter
- * @ignore
- * @return function - The emitter function that emits the message.
- */
-const emitter = (level: string) => 
-function emit(this: EventEmitter, ...args: any[]) {
-  this.emit(level, format.apply(null, args));
-};
 
-/** @class Log - A class that represents a logger. */
-export default 
-class Log {
-  private event: any
-  /**
-   * The namespace of the logger's instance
-   * @param namespace: string = 'mrdoc'
-   */
-  constructor(namespace: string = 'mrdoc') {
-    this.event = sparkles(namespace);
-    Log.levels.forEach(level => { this.event[level] = emitter(level); });
+type LogLevel = 'log' | 'info' | 'debug' | 'warn' | 'error';
+
+export default class Log implements LogInterface {
+  private namespace?: string;
+
+  constructor(namespace?: string) {
+    this.namespace = namespace;
   }
+
   /**
-   * Call the debug logger.
+   * Outputs to console without any namepsaces or colors.
+   * 
+   * @param message - The message to output.
+   * @param data - The supporting data to output.
+   * 
+   * # Remark
+   * 
+   * `out()` is an alias to `console.log()`
    */
-  debug(...args: any[]) {
-    this.event.debug(...args);
+  out = (message: string, ...data: any[]): void => {
+    if (data.length > 0) {
+      console.log(message, data);
+    }
+    console.log(message);
   }
+
   /**
-   * Call the debug logger.
+   * Outputs to console using a grey color to indicate the log level.
+   * 
+   * @param message - The message to output.
+   * @param data - The supporting data to output.
+   * 
+   * # Remark
+   * 
+   * `log()` does not color the message.
    */
-  info(...args: any[]) {
-    this.event.info(...args);
+  log = (message: string, ...data: any[]): void => {
+    this.emit('log', message, data);
   }
+
   /**
-   * Call the debug logger.
+   * Outputs to console using a blue color to indicate the log level.
+   * 
+   * @param message - The message to output.
+   * @param data - The supporting data to output.
+   * 
+   * # Remark
+   * 
+   * `info()` does not color the message.
    */
-  warn(...args: any[]) {
-    this.event.warn(...args);
+  info = (message: string, ...data: any[]): void => {
+    this.emit('info', message, data)
   }
+
   /**
-   * Call the debug logger.
+   * Outputs to console using a green color to indicate the log level.
+   * 
+   * @param message - The message to output.
+   * @param data - The supporting data to output.
+   * 
+   * # Remark
+   * 
+   * `debug()` does not color the message.
    */
-  error(...args: any[]) {
-    this.event.error(...args);
+  debug = (message: string, ...data: any[]): void => {
+    this.emit('debug', message, data)
   }
+
   /**
-   * Catch the event based on log level.
+   * Outputs to console using a yellow color to indicate the log level.
+   * 
+   * @param message - The message to output.
+   * @param data - The supporting data to output.
+   * 
+   * # Remark
+   * 
+   * `warn()` does not color the message.
    */
-  on(...args: any[]) {
-    this.event.on(...args);
+  warn = (message: string, ...data: any[]): void => {
+    this.emit('warn', message, data)
   }
+
   /**
-   * Unsubscribe to the current namespace.
+   * Outputs to console using a red color to indicate the log level.
+   * 
+   * @param message - The message to output.
+   * @param data - The supporting data to output.
+   * 
+   * # Remark
+   * 
+   * `error()` does not color the message.
    */
-  off() {
-    this.event.remove();
+  error = (message: string, ...data: any[]): void => {
+    this.emit('error', message, data)
   }
-  /**
-   * Get the available levels.
-   * @static
-   * @return {Array<string>} - The available levels in Log.
-   */
-  static get levels() {
-    return ['debug', 'info', 'warn', 'error'];
+
+  private emit = (level: LogLevel, message: string, data: any[]): void => {
+    if (data.length > 0) {
+      console[level](this.color(level, message), data);
+    } else console[level](this.color(level, message));
   }
-  /**
-   * Get an instance of Chalk.
-   * @return {Chalk} - An instance of Chalk.
-   */
-  static get color() {
-    return chalk;
+
+  private color(level: LogLevel, message: string) {
+    switch (level) {
+      case 'log':
+        if (this.namespace) {
+          return `[${chalk.default.cyan(this.namespace)}]: ` + chalk.default.gray('log') + ' - ' + message;
+        }
+        return message;
+      case 'info':
+        if (this.namespace) {
+          return `[${chalk.default.magenta(this.namespace)}]: ` + chalk.default.blue('info') + ' - ' + message;
+        }
+        return chalk.default.blue(message);
+      case 'debug':
+        if (this.namespace) {
+          return `[${chalk.default.magenta(this.namespace)}]: ` + chalk.default.green('debug') + ' - ' + message;
+        }
+        return chalk.default.green(message);
+      case 'warn':
+        if (this.namespace) {
+          return `[${chalk.default.magenta(this.namespace)}]: ` + chalk.default.yellow('warn') + ' - ' + message;
+        }
+        return chalk.default.yellow(message);
+      case 'error':
+        if (this.namespace) {
+          return `[${chalk.default.magenta(this.namespace)}]: ` + chalk.default.red('error') + ' - ' + message;
+        }
+        return chalk.default.red(message);
+      default:
+        break;
+    }
   }
 }
