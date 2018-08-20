@@ -19,7 +19,7 @@ export interface LogInterface {
 
 type LogLevel = 'log' | 'info' | 'debug' | 'warn' | 'error';
 
-export default abstract class Log implements LogInterface {
+export abstract class Log implements LogInterface {
   private namespace?: string;
 
   constructor(namespace?: string) {

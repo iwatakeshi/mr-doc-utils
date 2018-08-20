@@ -1,5 +1,2 @@
-const Log = require('./build/src/Log');
-
-module.exports['default'] = module.exports =  {
-  Log,
-};
+const Utils = require('./build/src/').default;
+module.exports['default'] = module.exports = Utils;
