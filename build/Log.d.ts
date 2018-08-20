@@ -9,7 +9,7 @@ export interface LogInterface {
     warn(message: string, ...data: any[]): void;
     error(message: string, ...data: any[]): void;
 }
-export default class Log implements LogInterface {
+export default abstract class Log implements LogInterface {
     private namespace?;
     constructor(namespace?: string);
     /**
