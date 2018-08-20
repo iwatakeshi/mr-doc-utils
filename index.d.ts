@@ -1,6 +1,4 @@
-import * as Utils_ from './src';
+import * as Utils from './src';
 export * from './src/';
 
-declare namespace Utils {
-  const Log: Utils_.Log
-}
+export default Utils;
