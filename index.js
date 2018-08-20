@@ -1,2 +1,2 @@
-const Utils = require('./build/src/').default;
+const Utils = require('./build/').default;
 module.exports['default'] = module.exports = Utils;
