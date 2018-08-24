@@ -9,9 +9,15 @@ export interface LogInterface {
     warn(message: string, ...data: any[]): void;
     error(message: string, ...data: any[]): void;
 }
+export declare type LogLevel = 'log' | 'info' | 'debug' | 'warn' | 'error';
+export interface LogOptions {
+    enabled: boolean;
+    levels: LogLevel[];
+}
 export declare abstract class Log implements LogInterface {
     private namespace?;
-    constructor(namespace?: string);
+    private options;
+    constructor(namespace?: string, options?: LogOptions);
     /**
      * Outputs to console without any namepsaces or colors.
      *

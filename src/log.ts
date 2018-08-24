@@ -17,13 +17,28 @@ export interface LogInterface {
   error(message: string, ...data: any[]): void
 }
 
-type LogLevel = 'log' | 'info' | 'debug' | 'warn' | 'error';
+export type LogLevel = 'log' | 'info' | 'debug' | 'warn' | 'error';
+
+export interface LogOptions {
+  enabled: boolean;
+  levels: LogLevel[]
+}
 
 export abstract class Log implements LogInterface {
   private namespace?: string;
-
-  constructor(namespace?: string) {
+  private options: LogOptions
+  constructor(namespace?: string, options?: LogOptions) {
     this.namespace = namespace;
+    this.options = Object.assign(options || {}, {
+      enabled: true,
+      levels: [
+        'log',
+        'info',
+        'debug',
+        'warn',
+        'error'
+      ] as LogLevel[]
+    })
   }
 
   /**
@@ -114,9 +129,11 @@ export abstract class Log implements LogInterface {
   }
 
   private emit = (level: LogLevel, message: string, data: any[]): void => {
-    if (data.length > 0) {
-      console[level](this.color(level, message), data);
-    } else console[level](this.color(level, message));
+    if (this.options.enabled && this.options.levels.includes(level)) {
+      if (data.length > 0) {
+        console[level](this.color(level, message), data);
+      } else console[level](this.color(level, message));
+    }
   }
 
   private color(level: LogLevel, message: string) {

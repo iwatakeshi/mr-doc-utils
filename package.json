@@ -3,8 +3,7 @@
   "version": "2.3.1",
   "description": "Utilities for Mr. Doc",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mr-doc/mr-doc-utils.git"
